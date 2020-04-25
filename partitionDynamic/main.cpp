@@ -32,35 +32,6 @@ void swap(individual *a, individual *b)
     *b = t;
 }
 
-void quickSortFit(vector<individual> &array, int low, int high)
-{
-    int i = low;
-    int j = high;
-    float pivot = array[(i + j) / 2].fitness;
-    float temp;
-
-    while (i <= j)
-    {
-        while (array[i].fitness < pivot)
-            i++;
-
-        while (array[j].fitness > pivot)
-            j--;
-
-        if (i <= j)
-        {
-            swap(&array[i], &array[j]);
-            i++;
-            j--;
-        }
-    }
-
-    if (j > low)
-        quickSortFit(array, low, j);
-    if (i < high)
-        quickSortFit(array, i, high);
-}
-
 void quickSortXcord(vector<individual> &array, int low, int high)
 {
     int i = low;
@@ -306,8 +277,6 @@ void mutation(vector<individual> &indvVec, list_t<Region> *regionList)
         regionList = regionList->next;
     }
 
-    //cout << "START" << endl;
-    //cout << "size: " << indvVec.size() << endl;
     for (int i = 0; i < indvVec.size(); i++)
     {
         if (indvVec[i].x_cord == indvVec[i].region->bestX)
@@ -317,23 +286,15 @@ void mutation(vector<individual> &indvVec, list_t<Region> *regionList)
         dif -= indvVec[i].region->mutChange * 1000.0;
         dif /= 1000.0;
 
-        //dif = ((rand() % (int)2 * indvVec[i].region->mutChange) - indvVec[i].region->mutChange) * 1000.0) / 1000.0;
         indvVec[i].x_cord += dif;
-
-        //cout << indvVec[i].x_cord << " | ";
-        //cout << "dif: " << dif;
-        //cout << " | mutChange: " << indvVec[i].region->mutChange;
-        //cout << " | " << i << endl;
 
         if (indvVec[i].x_cord < -X_LIMITS || indvVec[i].x_cord > X_LIMITS)
         {
             indvVec[i].x_cord = indvVec[i].region->startX + rand() % (indvVec[i].region->endX - indvVec[i].region->startX);
             indvVec[i].x_cord /= X_SCALE;
             indvVec[i].x_cord -= X_LIMITS;
-            //cout << "start: " << current->data->startX << " | end: " << current->data->endX << " | point: " << posiX << endl;
         }
     }
-    //cout << "END" << endl;
 }
 
 void eletism(vector<individual> &indVec)
@@ -374,24 +335,6 @@ void equalizeRegionIndv(vector<individual> &indVec, list_t<Region> *regionList)
     }
 }
 
-void genocide(vector<individual> &indvVec)
-{
-    quickSortFit(indvVec, 0, indvVec.size() - 1);
-
-    int startPosi = (int)indvVec.size() * 0.7;
-
-    for (int i = startPosi; i < indvVec.size(); i++)
-    {
-        indvVec[i].x_cord = (rand() % (2 * X_LIMITS * 100) - X_LIMITS * 100) / 100.0;
-        indvVec[i].fitness = -MAX_Y;
-
-        if (indvVec[i].x_cord < -X_LIMITS)
-            indvVec[i].x_cord = -X_LIMITS;
-        else if (indvVec[i].x_cord > X_LIMITS)
-            indvVec[i].x_cord = X_LIMITS;
-    }
-}
-
 int main()
 {
     srand(time(0));
@@ -408,9 +351,6 @@ int main()
 
     regionList = createRegionList();
 
-    //defineRegions(indVec, regionList);
-    //equalizeRegionIndv(indVec, regionList);
-
     cout.precision(4);
     while (1)
     {
@@ -421,7 +361,6 @@ int main()
 
         if (!(gen % 150))
         {
-            genocide(indVec);
             defineRegions(indVec, regionList);
             equalizeRegionIndv(indVec, regionList);
         }
