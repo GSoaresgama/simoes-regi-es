@@ -11,9 +11,12 @@
 #define HEIGHT 600
 #define LENGHT 1800
 
-#define START_MUT 1
-#define MUT_DECREASE_RATE 0.95
-#define MUT_INCREASE_RATE 1.1
+#define START_MUT 50
+#define MUT_DECREASE_RATE 0.80
+#define MUT_INCREASE_RATE 2
+
+#define MAX_VALUE 4.76224
+#define ERROR 0.01
 
 using namespace std;
 using namespace cv;
@@ -22,11 +25,11 @@ using namespace cv;
 const float X_SCALE = LENGHT / (2.0 * X_LIMITS);
 const float Y_SCALE = HEIGHT / (MAX_Y * 2 * 1.2);
 
-float MUT_CHANGE = 1;
 float bestXcord = 0;
 float best = -MAX_Y;
+int test = 0;
 
-int INDV_COUNT = 10;
+int START_POP = 10;
 int regionListSize;
 
 Mat functionImg(HEIGHT, LENGHT, CV_8UC3, Scalar(0, 0, 0));
@@ -131,7 +134,6 @@ void decreaseHasImproved(list_t<Region> *regionList)
     {
         if (regionList->data->hasImproved > 0)
         {
-            cout << "reg posi: " << regionList->data->startX << endl;
             regionList->data->hasImproved--;
         }
 
@@ -157,6 +159,8 @@ void calculatesFitness(vector<individual> &indVec, list_t<Region> *regionList)
                 bestXcord = indVec[i].x_cord;
             }
         }
+
+        test++;
     }
 }
 
@@ -168,7 +172,7 @@ list_t<Region> *createRegionList()
 
     start = currnet;
 
-    for (int i = 0; i < INDV_COUNT; i++)
+    for (int i = 0; i < START_POP; i++)
     {
         currnet->data = new Region;
         currnet->data->best = -MAX_Y;
@@ -190,8 +194,9 @@ void defineRegions(vector<individual> &indVec, list_t<Region> *regionList)
 {
     quickSortXcord(indVec, 0, indVec.size() - 1);
 
+    const float dist = 2.0 * X_LIMITS / START_POP;
+
     float cordDif;
-    const float dist = 2.0 * X_LIMITS / INDV_COUNT;
 
     int begin = 0;
     bool concentredFlag = false;
@@ -207,7 +212,7 @@ void defineRegions(vector<individual> &indVec, list_t<Region> *regionList)
         cordDif = indVec[i].x_cord - indVec[i - 1].x_cord;
         indVec[i - 1].region = regionList->data;
 
-        if (cordDif > dist || (concentredFlag && indVec[i].x_cord - indVec[i - 1].x_cord > dist / 1.5))
+        if (cordDif > dist)
         {
             regionListSize++;
             regionList->data->endX = X_SCALE * (indVec[i - 1].x_cord + indVec[i].x_cord) / 2 + LENGHT / 2;
@@ -271,8 +276,8 @@ void mutation(vector<individual> &indvVec, list_t<Region> *regionList)
 
     for (int i = 0; i < regionListSize; i++)
     {
-        if (regionList->data->mutChange > (maxMut = (regionList->data->endX - regionList->data->startX) / (X_SCALE * 2)))
-            regionList->data->mutChange = START_MUT;
+        if (regionList->data->mutChange > (maxMut = (regionList->data->endX - regionList->data->startX) * 100 / (X_SCALE * 2.0)))
+            regionList->data->mutChange = maxMut;
         else if (regionList->data->mutChange < START_MUT)
             regionList->data->mutChange = START_MUT;
 
@@ -280,14 +285,10 @@ void mutation(vector<individual> &indvVec, list_t<Region> *regionList)
             regionList->data->mutChange *= MUT_INCREASE_RATE;
         else
         {
-            regionList->data->mutChange = START_MUT;
-            regionList->data->mutChange *= MUT_DECREASE_RATE;
-        }
+            if (regionList->data->mutChange > START_MUT)
+                regionList->data->mutChange = START_MUT;
 
-        if (i == regionListSize - 1)
-        {
-            cout << "reg: " << i << " | mut: " << regionList->data->mutChange << " | start: " << regionList->data->startX
-                 << " |  end: " << regionList->data->endX << " | hasImproved: " << regionList->data->hasImproved << endl;
+            regionList->data->mutChange *= MUT_DECREASE_RATE;
         }
 
         regionList = regionList->next;
@@ -298,9 +299,10 @@ void mutation(vector<individual> &indvVec, list_t<Region> *regionList)
         if (indvVec[i].x_cord == indvVec[i].region->bestX)
             continue;
 
-        dif = rand() % (int)(2 * indvVec[i].region->mutChange * 1000.0);
-        dif -= indvVec[i].region->mutChange * 1000.0;
-        dif /= 1000.0;
+        dif = (rand() % (int)(2 * indvVec[i].region->mutChange) - indvVec[i].region->mutChange) / 100.0;
+        // dif = rand() % (int)(2 * indvVec[i].region->mutChange * 1000.0);
+        // dif -= indvVec[i].region->mutChange * 1000.0;
+        // dif /= 1000.0;
 
         indvVec[i].x_cord += dif;
 
@@ -359,42 +361,77 @@ int main()
     namedWindow(funcWindow);
 
     int gen = 0;
+    int totalGen = 0;
+    int totalTests = 0;
 
     vector<individual> indVec;
     list_t<Region> *regionList;
 
-    indVec.resize(INDV_COUNT);
+    indVec.resize(START_POP);
 
     regionList = createRegionList();
 
-    cout.precision(4);
-    while (1)
+    cout.precision(6);
+
+    cout << "population size at start: " << START_POP << " interval: " << 40 << endl;
+
+    for (int i = 0; i < 500; i++)
     {
-        functionImg.setTo(Scalar(0, 0, 0));
+        totalGen += gen;
+        totalTests += test;
 
-        drawGrath();
-        drawFunctionValues();
+        gen = 0;
+        test = 0;
+        bestXcord = 0;
+        best = -MAX_Y;
 
-        if (!(gen % 150))
+        indVec.resize(START_POP);
+
+        for (int j = 0; j < START_POP; j++)
+            indVec[j].reset();
+
+        defineRegions(indVec, regionList);
+        equalizeRegionIndv(indVec, regionList);
+
+        while (1)
         {
-            defineRegions(indVec, regionList);
-            equalizeRegionIndv(indVec, regionList);
+            functionImg.setTo(Scalar(0, 0, 0));
+
+            drawGrath();
+            drawFunctionValues();
+
+            if (!(gen % 40))
+            {
+                defineRegions(indVec, regionList);
+                equalizeRegionIndv(indVec, regionList);
+            }
+
+            drawRegions(regionList);
+
+            calculatesFitness(indVec, regionList);
+            plotPoints(indVec);
+
+            eletism(indVec);
+
+            mutation(indVec, regionList);
+
+            //imshow(funcWindow, functionImg);
+            //waitKey(1);
+
+            if (best > MAX_VALUE - ERROR)
+            {
+                //cout << best << "  ";
+                cout << gen << "  ";
+                cout << test << endl;
+                //waitKey(0);
+                break;
+            }
+
+            gen++;
         }
-
-        drawRegions(regionList);
-
-        calculatesFitness(indVec, regionList);
-        plotPoints(indVec);
-
-        eletism(indVec);
-
-        mutation(indVec, regionList);
-
-        imshow(funcWindow, functionImg);
-        waitKey(0);
-        gen++;
-        cout << "gen: " << gen << endl;
     }
+
+    cout << "total gen: " << totalGen << " | total tests: " << totalTests << endl;
 
     return 0;
 }

@@ -9,10 +9,13 @@
 #define LENGHT 1800
 #define MAX_Y 6.0
 #define X_LIMITS 75
-#define INDV_COUNT 30
-#define START_MUT 1
-#define MUT_DECREASE_RATE 0.95
-#define MUT_INCREASE_RATE 1.1
+#define INDV_COUNT 50
+#define START_MUT 50
+#define MUT_DECREASE_RATE 0.80
+#define MUT_INCREASE_RATE 2
+
+#define MAX_VALUE 4.76224
+#define ERROR 0.01
 
 #define MAX_GEN 10000
 
@@ -23,10 +26,12 @@ using namespace cv;
 const float X_SCALE = LENGHT / (2 * X_LIMITS);
 const float Y_SCALE = HEIGHT / (MAX_Y * 2 * 1.2);
 
-float MAX_MUT = X_LIMITS * 50;
-float MUT = 30;
+const float MAX_MUT = 2 * X_LIMITS * 100;
+
+float MUT = START_MUT;
 
 int hasImproved = 5;
+int test = 0;
 
 Mat functionImg(HEIGHT, LENGHT, CV_8UC3, Scalar(0, 0, 0));
 
@@ -102,35 +107,31 @@ void calculatesFitness(float *indvs, float *fitness, float *best, int *bestIndex
     float sum = 0;
     float lastBest = *best;
 
+    if (hasImproved > 0)
+        hasImproved--;
+
     for (int i = 0; i < INDV_COUNT; i++)
     {
         if ((fitness[i] = func(indvs[i])) > *best)
         {
             *best = fitness[i];
             *bestIndex = i;
+            hasImproved = 5;
         }
         sum += fitness[i];
+        test++;
     }
 
     bestFitHist[gen] = *best;
     averageFitHist[gen] = sum / INDV_COUNT;
-
-    if (*best - lastBest < 0.01)
-    {
-        if (hasImproved > 0)
-            hasImproved--;
-    }
-    else
-        hasImproved = 5;
 }
 
 void simpleMutation(float *indv)
 {
-
-    if (MUT < 1)
-        MUT = 1;
-    else if (MUT > MAX_MUT)
+    if (MUT > MAX_MUT)
         MUT = MAX_MUT;
+    else if (MUT < START_MUT)
+        MUT = START_MUT;
 
     if (hasImproved == 0)
         MUT *= MUT_INCREASE_RATE;
@@ -203,8 +204,11 @@ int main()
     namedWindow(funcWindow);
 
     int gen = 0;
-    int bestIndex = 0;
 
+    int totalGen = 0;
+    int totalTests = 0;
+
+    int bestIndex = 0;
     float best = -MAX_Y;
 
     float *indvs = new float[INDV_COUNT];
@@ -212,29 +216,53 @@ int main()
     float *bestFitHist = new float[MAX_GEN];
     float *averageFitHist = new float[MAX_GEN];
 
-    inicializeIndv(indvs, fitness);
-    calculatesFitness(indvs, fitness, &best, &bestIndex, gen, bestFitHist, averageFitHist);
+    cout.precision(6);
 
-    while (gen < MAX_GEN)
+    for (int i = 0; i < 500; i++)
     {
-        functionImg.setTo(Scalar(0, 0, 0));
+        totalGen += gen;
+        totalTests += test;
+        gen = 0;
+        test = 0;
+        MUT = START_MUT;
+        hasImproved = 5;
+        best = -MAX_Y;
+        bestIndex = 0;
 
-        drawGrath();
-        drawFunctionValues();
+        inicializeIndv(indvs, fitness);
+        //calculatesFitness(indvs, fitness, &best, &bestIndex, gen, bestFitHist, averageFitHist);
 
-        calculatesFitness(indvs, fitness, &best, &bestIndex, gen, bestFitHist, averageFitHist);
-        plotPoints(indvs, bestIndex);
+        while (gen < MAX_GEN)
+        {
+            functionImg.setTo(Scalar(0, 0, 0));
 
-        eletism(indvs, bestIndex);
+            drawGrath();
+            drawFunctionValues();
 
-        plotInfoGrath(gen, bestFitHist, averageFitHist);
-        imshow(funcWindow, functionImg);
-        waitKey(0);
+            calculatesFitness(indvs, fitness, &best, &bestIndex, gen, bestFitHist, averageFitHist);
+            plotPoints(indvs, bestIndex);
 
-        cout << best << endl;
+            eletism(indvs, bestIndex);
 
-        gen++;
+            //plotInfoGrath(gen, bestFitHist, averageFitHist);
+            imshow(funcWindow, functionImg);
+
+            if (best > MAX_VALUE - ERROR)
+            {
+                cout << best << "  ";
+                cout << gen << "  ";
+                cout << test << endl;
+
+                break;
+            }
+
+            waitKey(1);
+
+            gen++;
+        } /* code */
     }
+
+    cout << "total gen: " << totalGen << " | total tests: " << totalTests << endl;
 
     return 0;
 }

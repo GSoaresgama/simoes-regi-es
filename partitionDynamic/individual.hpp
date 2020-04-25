@@ -14,4 +14,6 @@ public:
 
     individual(/* args */);
     ~individual();
+
+    void reset();
 };

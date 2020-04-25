@@ -17,3 +17,16 @@ individual::individual(/* args */)
 individual::~individual()
 {
 }
+
+void individual::reset()
+{
+    fitness = -MAX_Y;
+    x_cord = (rand() % (2 * X_LIMITS * 100) - X_LIMITS * 100) / 100.0;
+
+    if (x_cord < -X_LIMITS)
+        x_cord = -X_LIMITS;
+    else if (x_cord > X_LIMITS)
+        x_cord = X_LIMITS;
+
+    region = nullptr;
+}

@@ -1,6 +1,6 @@
 #pragma once
 
-#define MAX_Y 7.0
+#define MAX_Y 6.0
 #define X_LIMITS 75
 #define MIN_REGION_POP 5
 #define BEGIN_MUT_VAL 0.05

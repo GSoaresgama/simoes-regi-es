@@ -2,7 +2,10 @@
 
 #include "structs.hpp"
 
-#define NUMBER_OF_REGIONS 5
+#define NUMBER_OF_REGIONS 10
+
+const int INDV_BY_REGION = 50 / NUMBER_OF_REGIONS;
+
 const int regionSize = 2 * X_LIMITS / NUMBER_OF_REGIONS;
 
 class Region
