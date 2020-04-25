@@ -7,11 +7,11 @@
 
 #define HEIGHT 600
 #define LENGHT 1800
-#define MAX_Y 3.0
-#define X_LIMITS 10
+#define MAX_Y 6.0
+#define X_LIMITS 75
 #define INDV_COUNT 10
-#define GENOCIDE_PER 0.3
-#define GENOCIDE_INTERVAL 20
+
+#define MAX_GEN 10000
 
 using namespace std;
 using namespace cv;
@@ -27,7 +27,7 @@ Mat functionImg(HEIGHT, LENGHT, CV_8UC3, Scalar(0, 0, 0));
 
 float func(float x)
 {
-    return sin(3 * x) + cos(x) + sin(x * cos(x));
+    return (2 * cos(0.39 * x) + 5 * sin(0.5 * x) + 0.5 * cos(0.1 * x) + 10 * sin(0.7 * x) + 5 * sin(1 * x) + 5 * sin(0.35 * x)) / 5;
 }
 
 void drawGrath()
@@ -234,23 +234,6 @@ void printIndvs(float *indvs, float *fitness)
     cout << "---------------------------------------" << endl;
 }
 
-void genocide(float *indvs, float *fitness, int *bestIndex)
-{
-    quickSort(indvs, fitness, 0, INDV_COUNT - 1);
-
-    int quant = (int)INDV_COUNT * GENOCIDE_PER;
-
-    cout << quant << endl;
-
-    for (int i = 0; i < quant; i++)
-    {
-        fitness[i] = func(indvs[i]);
-        indvs[i] = (float)(rand() % (2 * X_LIMITS) - X_LIMITS);
-    }
-
-    *bestIndex = INDV_COUNT - 1;
-}
-
 int main()
 {
     srand(time(0));
@@ -260,24 +243,21 @@ int main()
 
     int gen = 0;
     int bestIndex = 0;
-    int genocideInterval = GENOCIDE_INTERVAL;
 
     float best = -MAX_Y;
     float minAverage;
 
     float *indvs = new float[INDV_COUNT];
     float *fitness = new float[INDV_COUNT];
-    float *bestFitHist = new float[10000];
-    float *averageFitHist = new float[10000];
+    float *bestFitHist = new float[MAX_GEN];
+    float *averageFitHist = new float[MAX_GEN];
 
     inicializeIndv(indvs, fitness);
     calculatesFitness(indvs, fitness, &best, &bestIndex, gen, bestFitHist, averageFitHist);
 
     minAverage = averageFitHist[0];
 
-    cout << "min: " << minAverage << endl;
-
-    while (1)
+    while (gen < MAX_GEN)
     {
         functionImg.setTo(Scalar(0, 0, 0));
 
@@ -290,28 +270,10 @@ int main()
 
         plotInfoGrath(gen, bestFitHist, averageFitHist);
         imshow(funcWindow, functionImg);
-        waitKey(100);
-
-        if (averageFitHist[gen] < minAverage && genocideInterval < 0)
-        {
-
-            genocideInterval = GENOCIDE_INTERVAL;
-            genocide(indvs, fitness, &bestIndex);
-            cout << "genocide" << endl;
-
-            MAX_MUT /= 4;
-
-            waitKey(0);
-        }
+        waitKey(1);
 
         gen++;
-        genocideInterval--;
     }
-
-    delete (indvs);
-    delete (fitness);
-    delete (bestFitHist);
-    delete (averageFitHist);
 
     return 0;
 }
