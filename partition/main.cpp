@@ -11,12 +11,19 @@
 #define HEIGHT 600
 #define LENGHT 1800
 
+#define START_MUT 1
+#define MUT_DECREASE_RATE 0.95
+#define MUT_INCREASE_RATE 1.1
+
 using namespace std;
 using namespace cv;
 
 //globals:
 const float X_SCALE = LENGHT / (2.0 * X_LIMITS);
 const float Y_SCALE = HEIGHT / (MAX_Y * 2 * 1.2);
+
+float bestXcord = 0;
+float best = -MAX_Y;
 
 float MUT_CHANGE = 1;
 
@@ -41,7 +48,6 @@ void quickSortXcord(vector<individual> &array, int low, int high)
     int i = low;
     int j = high;
     float pivot = array[(i + j) / 2].x_cord;
-    float temp;
 
     while (i <= j)
     {
@@ -111,6 +117,11 @@ void plotPoints(vector<individual> indVec)
 
         circle(functionImg, pt, 2, Scalar(0, 255, 0), FILLED);
     }
+
+    pt.x = bestXcord * X_SCALE + LENGHT / 2;
+    pt.y = -func(bestXcord) * Y_SCALE + HEIGHT / 2;
+
+    circle(functionImg, pt, 2, Scalar(0, 0, 255), FILLED);
 }
 
 void decreaseHasImproved(list_t<Region> *regionList)
@@ -138,6 +149,12 @@ void calculatesFitness(vector<individual> &indVec, list_t<Region> *regionList)
             indVec[i].region->best = indVec[i].fitness;
             indVec[i].region->bestX = indVec[i].x_cord;
             indVec[i].region->hasImproved = 5;
+
+            if (indVec[i].region->best > best)
+            {
+                best = indVec[i].region->best;
+                bestXcord = indVec[i].x_cord;
+            }
         }
     }
 }
@@ -196,24 +213,21 @@ void drawRegions(list_t<Region> *regionList)
 
 void mutation(vector<individual> &indvVec, list_t<Region> *regionList)
 {
-    int divIndex;
-    int histIndex;
-
     float dif;
 
     for (int i = 0; i < NUMBER_OF_REGIONS; i++)
     {
         if (regionList->data->mutChange > regionSize / 2)
-            regionList->data->mutChange = BEGIN_MUT_VAL;
-        else if (regionList->data->mutChange < BEGIN_MUT_VAL)
-            regionList->data->mutChange = BEGIN_MUT_VAL;
+            regionList->data->mutChange = START_MUT;
+        else if (regionList->data->mutChange < START_MUT)
+            regionList->data->mutChange = START_MUT;
 
         if (regionList->data->hasImproved == 0)
-            regionList->data->mutChange *= 1.05;
+            regionList->data->mutChange *= MUT_INCREASE_RATE;
         else
         {
-            regionList->data->mutChange = BEGIN_MUT_VAL;
-            regionList->data->mutChange *= 0.95;
+            regionList->data->mutChange = START_MUT;
+            regionList->data->mutChange *= MUT_DECREASE_RATE;
         }
 
         regionList = regionList->next;
@@ -289,9 +303,9 @@ int main()
 
         drawRegions(regionList);
 
+        calculatesFitness(indVec, regionList);
         plotPoints(indVec);
 
-        calculatesFitness(indVec, regionList);
         eletism(indVec);
 
         mutation(indVec, regionList);

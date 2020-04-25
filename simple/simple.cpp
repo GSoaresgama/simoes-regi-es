@@ -9,7 +9,10 @@
 #define LENGHT 1800
 #define MAX_Y 6.0
 #define X_LIMITS 75
-#define INDV_COUNT 10
+#define INDV_COUNT 30
+#define START_MUT 1
+#define MUT_DECREASE_RATE 0.95
+#define MUT_INCREASE_RATE 1.1
 
 #define MAX_GEN 10000
 
@@ -20,7 +23,9 @@ using namespace cv;
 const float X_SCALE = LENGHT / (2 * X_LIMITS);
 const float Y_SCALE = HEIGHT / (MAX_Y * 2 * 1.2);
 
-float MAX_MUT = 30;
+float MAX_MUT = X_LIMITS * 50;
+float MUT = 30;
+
 int hasImproved = 5;
 
 Mat functionImg(HEIGHT, LENGHT, CV_8UC3, Scalar(0, 0, 0));
@@ -74,7 +79,7 @@ void inicializeIndv(float *indvs, float *fitness)
     }
 }
 
-void plotPoints(float *indvs)
+void plotPoints(float *indvs, int bestIndex)
 {
     Point pt;
 
@@ -85,6 +90,11 @@ void plotPoints(float *indvs)
 
         circle(functionImg, pt, 2, Scalar(0, 255, 0), FILLED);
     }
+
+    pt.x = indvs[bestIndex] * X_SCALE + LENGHT / 2;
+    pt.y = -func(indvs[bestIndex]) * Y_SCALE + HEIGHT / 2;
+
+    circle(functionImg, pt, 2, Scalar(0, 0, 255), FILLED);
 }
 
 void calculatesFitness(float *indvs, float *fitness, float *best, int *bestIndex, int gen, float *bestFitHist, float *averageFitHist)
@@ -117,22 +127,22 @@ void calculatesFitness(float *indvs, float *fitness, float *best, int *bestIndex
 void simpleMutation(float *indv)
 {
 
-    if (MAX_MUT < 1)
-        MAX_MUT = 1;
-    else if (MAX_MUT > X_LIMITS * 50)
-        MAX_MUT = X_LIMITS * 50;
+    if (MUT < 1)
+        MUT = 1;
+    else if (MUT > MAX_MUT)
+        MUT = MAX_MUT;
 
     if (hasImproved == 0)
-        MAX_MUT *= 1.1;
+        MUT *= MUT_INCREASE_RATE;
     else
     {
-        if (MAX_MUT > 10)
-            MAX_MUT = 10;
+        if (MUT > START_MUT)
+            MUT = START_MUT;
 
-        MAX_MUT *= 0.95;
+        MUT *= MUT_DECREASE_RATE;
     }
 
-    *indv += (rand() % (int)(2 * MAX_MUT) - MAX_MUT) / 100.0;
+    *indv += (rand() % (int)(2 * MUT) - MUT) / 100.0;
     if (*indv > X_LIMITS)
         *indv = X_LIMITS;
     else if (*indv < -X_LIMITS)
@@ -156,7 +166,6 @@ void plotInfoGrath(int gen, float *bestFitHist, float *averageFitHist)
 {
     int maxLenght = 600;
     int maxHeight = HEIGHT / 2;
-    int gap;
 
     static Mat infoGraph(maxHeight, maxLenght, CV_8UC1);
     infoGraph = Mat::zeros(infoGraph.size(), infoGraph.type());
@@ -186,54 +195,6 @@ void plotInfoGrath(int gen, float *bestFitHist, float *averageFitHist)
     waitKey(1);
 }
 
-void swap(float *a, float *b)
-{
-    float t = *a;
-    *a = *b;
-    *b = t;
-}
-
-void quickSort(float *arrayToSort, float *array, int low, int high)
-{
-    int i = low;
-    int j = high;
-    float pivot = array[(i + j) / 2];
-    float temp;
-
-    while (i <= j)
-    {
-        while (array[i] < pivot)
-            i++;
-
-        while (array[j] > pivot)
-            j--;
-
-        if (i <= j)
-        {
-            swap(&arrayToSort[i], &arrayToSort[j]);
-            swap(&array[i], &array[j]);
-            i++;
-            j--;
-        }
-    }
-
-    if (j > low)
-        quickSort(arrayToSort, array, low, j);
-    if (i < high)
-        quickSort(arrayToSort, array, i, high);
-}
-
-void printIndvs(float *indvs, float *fitness)
-{
-
-    for (int i = 0; i < INDV_COUNT; i++)
-    {
-        cout << "indv( " << i << "): " << indvs[i] << " | " << fitness[i] << endl;
-    }
-
-    cout << "---------------------------------------" << endl;
-}
-
 int main()
 {
     srand(time(0));
@@ -245,7 +206,6 @@ int main()
     int bestIndex = 0;
 
     float best = -MAX_Y;
-    float minAverage;
 
     float *indvs = new float[INDV_COUNT];
     float *fitness = new float[INDV_COUNT];
@@ -255,22 +215,23 @@ int main()
     inicializeIndv(indvs, fitness);
     calculatesFitness(indvs, fitness, &best, &bestIndex, gen, bestFitHist, averageFitHist);
 
-    minAverage = averageFitHist[0];
-
     while (gen < MAX_GEN)
     {
         functionImg.setTo(Scalar(0, 0, 0));
 
         drawGrath();
         drawFunctionValues();
-        plotPoints(indvs);
 
         calculatesFitness(indvs, fitness, &best, &bestIndex, gen, bestFitHist, averageFitHist);
+        plotPoints(indvs, bestIndex);
+
         eletism(indvs, bestIndex);
 
         plotInfoGrath(gen, bestFitHist, averageFitHist);
         imshow(funcWindow, functionImg);
-        waitKey(1);
+        waitKey(0);
+
+        cout << best << endl;
 
         gen++;
     }
