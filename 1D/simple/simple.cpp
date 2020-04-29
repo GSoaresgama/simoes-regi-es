@@ -128,6 +128,16 @@ void calculatesFitness(float *indvs, float *fitness, float *best, int *bestIndex
 
 void simpleMutation(float *indv)
 {
+
+    *indv += (rand() % (int)(2 * MUT) - MUT) / 100.0;
+    if (*indv > X_LIMITS)
+        *indv = X_LIMITS;
+    else if (*indv < -X_LIMITS)
+        *indv = -X_LIMITS;
+}
+
+void eletism(float *indvs, int bestIndex)
+{
     if (MUT > MAX_MUT)
         MUT = MAX_MUT;
     else if (MUT < START_MUT)
@@ -142,16 +152,6 @@ void simpleMutation(float *indv)
 
         MUT *= MUT_DECREASE_RATE;
     }
-
-    *indv += (rand() % (int)(2 * MUT) - MUT) / 100.0;
-    if (*indv > X_LIMITS)
-        *indv = X_LIMITS;
-    else if (*indv < -X_LIMITS)
-        *indv = -X_LIMITS;
-}
-
-void eletism(float *indvs, int bestIndex)
-{
 
     for (int i = 0; i < INDV_COUNT; i++)
     {
