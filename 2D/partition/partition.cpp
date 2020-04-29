@@ -2,22 +2,22 @@
 #include <cmath>
 
 #define MAX_Z 19.2085
-#define ERROR 0.0001
+#define ERROR 0.0005
 #define MAX_CORD_X 8.055
 #define MAX_CORD_Y 9.664
-#define DESIRED_POP_SIZE 500
+#define DESIRED_POP_SIZE 1000
 #define NUMBER_OF_DIMENSION 2
 
 #define START_MUT 5
-#define MUT_DECREASE_RATE 0.95
-#define MUT_INCREASE_RATE 1.05
+#define MUT_DECREASE_RATE 0.8
+#define MUT_INCREASE_RATE 2
 
 using namespace std;
 
 int hasImproved = 5;
 
 const float coordsLimits[] = {10, 10};
-const float regionSize[] = {1, 5};
+const float regionSize[] = {2, 2};
 const float MAX_MUT = 50 * coordsLimits[0];
 
 int totalNumberRegions;
@@ -27,6 +27,7 @@ int timeToChange[NUMBER_OF_DIMENSION];
 
 int POP_BY_REGION;
 int POP_SIZE;
+int test;
 
 float MUT = START_MUT;
 
@@ -36,20 +37,22 @@ struct indvData_t;
 
 typedef struct region_t
 {
-    indvData_t *bestIndv;
-    float maxFit;
+    float *bestCoords;
+    float maxFit = -MAX_Z;
+    int maxIndex;
 
     int hasImproved = 5;
 
     float startCoords[NUMBER_OF_DIMENSION];
     float endCoords[NUMBER_OF_DIMENSION];
+    float MUT = START_MUT;
 
 } region_t;
 
 typedef struct indvData_t
 {
-    float x;
-    float y;
+    region_t *region;
+    float coords[NUMBER_OF_DIMENSION];
 
     float fitness;
 
@@ -88,7 +91,7 @@ void defineRegions(region_t *regions)
 
         for (j = 0; j < regionsByDimension[i]; j++)
         {
-            regionLimits[i][j] = j * regionSize[i];
+            regionLimits[i][j] = j * regionSize[i] - regionSize[i] * regionsByDimension[i] / 2;
 
             //cout << regionLimits[i][j] << endl;
         }
@@ -109,89 +112,129 @@ void defineRegions(region_t *regions)
             regions[n_reg].endCoords[coord] = regions[n_reg].startCoords[coord] + regionSize[coord];
         }
     }
-    
+
     /*
     for (i = 0; i < totalNumberRegions; i++)
     {
         cout << "region(" << i << "): " << regions[i].startCoords[0] << " | ";
         cout << regions[i].startCoords[1] << endl;
     }
-    */
+    //*/
 }
 
-void inicializeIndv(indvData_t *indvs)
+void inicializeIndv(indvData_t *indvs, region_t *regions)
 {
-    for (int i = 0; i < POP_SIZE; i++)
+    int i;
+    int n_dim;
+    int region = 0;
+
+    for (i = 0; i < POP_SIZE; i++)
     {
         indvs[i].fitness = -MAX_Z;
-        indvs[i].x = (float)(rand() % (int)(2 * coordsLimits[0] * 100) - coordsLimits[0] * 100) / 100;
-        indvs[i].y = (float)(rand() % (int)(2 * coordsLimits[1] * 100) - coordsLimits[1] * 100) / 100;
 
-        //cout << indvs[i].x << " | " << indvs[i].y << endl;
+        if (!(i % POP_BY_REGION) && i != 0)
+            region++;
+
+        indvs[i].region = &regions[region];
+
+        for (n_dim = 0; n_dim < NUMBER_OF_DIMENSION; n_dim++)
+        {
+            indvs[i].coords[n_dim] = (float)(rand() % (int)(regionSize[n_dim] * 100)) / 100;
+            indvs[i].coords[n_dim] += regions[region].startCoords[n_dim];
+
+            //cout << "indv" << i << " :" << indvs[i].coords[n_dim] << " | ";
+        }
+        //cout << endl;
+    }
+}
+
+void setRegionMutation(region_t *regions)
+{
+    for (int i = 0; i < totalNumberRegions; i++)
+    {
+        if (regions[i].MUT > MAX_MUT)
+            regions[i].MUT = MAX_MUT;
+        else if (regions[i].MUT < START_MUT)
+            regions[i].MUT = START_MUT;
+
+        if (regions[i].hasImproved == 0)
+            regions[i].MUT *= MUT_INCREASE_RATE;
+        else
+        {
+            if (regions[i].MUT > START_MUT)
+                regions[i].MUT = START_MUT;
+
+            regions[i].MUT *= MUT_DECREASE_RATE;
+        }
     }
 }
 
 void simpleMutation(indvData_t *indv)
 {
-    if (MUT > MAX_MUT)
-        MUT = MAX_MUT;
-    else if (MUT < START_MUT)
-        MUT = START_MUT;
 
-    if (hasImproved == 0)
-        MUT *= MUT_INCREASE_RATE;
-    else
+    for (int n_dim = 0; n_dim < NUMBER_OF_DIMENSION; n_dim++)
     {
-        if (MUT > START_MUT)
-            MUT = START_MUT;
+        (*indv).coords[n_dim] += (rand() % (int)(2 * indv->region->MUT) - indv->region->MUT) / 100.0;
 
-        MUT *= MUT_DECREASE_RATE;
+        if ((*indv).coords[n_dim] > coordsLimits[n_dim])
+            (*indv).coords[n_dim] = coordsLimits[n_dim];
+        else if ((*indv).coords[n_dim] < -coordsLimits[n_dim])
+            (*indv).coords[n_dim] = -coordsLimits[n_dim];
     }
-
-    (*indv).x += (rand() % (int)(2 * MUT) - MUT) / 100.0;
-    (*indv).y += (rand() % (int)(2 * MUT) - MUT) / 100.0;
-
-    if ((*indv).x > coordsLimits[0])
-        (*indv).x = coordsLimits[0];
-    else if ((*indv).x < -coordsLimits[0])
-        (*indv).x = -coordsLimits[0];
-
-    if ((*indv).y > coordsLimits[1])
-        (*indv).y = coordsLimits[1];
-    else if ((*indv).y < -coordsLimits[1])
-        (*indv).y = -coordsLimits[1];
 }
 
-void calculateFitness(indvData_t *indvs, float *best, int *bestIndex)
+void calculateFitness(indvData_t *indvs, region_t *regions, float *best, int *bestIndex)
 {
-    if (hasImproved > 0)
-        hasImproved--;
+    for (int i = 0; i < totalNumberRegions; i++)
+    {
+        if (regions[i].hasImproved > 0)
+            regions[i].hasImproved--;
+    }
 
     for (int i = 0; i < POP_SIZE; i++)
     {
-        indvs[i].fitness = func(indvs[i].x, indvs[i].y);
+        indvs[i].fitness = func(indvs[i].coords[0], indvs[i].coords[1]);
 
-        if (indvs[i].fitness > *best)
+        if (indvs[i].fitness > indvs[i].region->maxFit)
         {
-            *best = indvs[i].fitness;
-            *bestIndex = i;
+            indvs[i].region->maxFit = indvs[i].fitness;
+            indvs[i].region->maxIndex = i;
+            indvs[i].region->bestCoords = indvs[i].coords;
+            indvs[i].region->hasImproved = 5;
 
-            hasImproved = 5;
+            if (indvs[i].region->maxFit > *best)
+            {
+                *best = indvs[i].region->maxFit;
+                *bestIndex = i;
+            }
         }
     }
+    test += POP_SIZE;
 }
 
 void eletism(indvData_t *indvs, float best, int bestIndex)
 {
     for (int i = 0; i < POP_SIZE; i++)
     {
-        if (i == bestIndex)
+        if (i == indvs[i].region->maxIndex)
             continue;
 
-        indvs[i].x = (indvs[i].x + indvs[bestIndex].x) / 2;
-        indvs[i].y = (indvs[i].y + indvs[bestIndex].y) / 2;
+        for (int n_dim = 0; n_dim < NUMBER_OF_DIMENSION; n_dim++)
+        {
+            indvs[i].coords[n_dim] = (indvs[i].coords[n_dim] + indvs[i].region->bestCoords[n_dim]) / 2;
+        }
 
         simpleMutation(&indvs[i]);
+    }
+}
+
+void resetRegion(region_t *regions)
+{
+    for (int i = 0; i < totalNumberRegions; i++)
+    {
+        regions[i].hasImproved = 5;
+        regions[i].maxFit = -MAX_Z;
+        regions[i].MUT = START_MUT;
     }
 }
 
@@ -206,11 +249,12 @@ int main()
 
     int gen = 0;
     int bestIndex;
-
+    int totalTest = 0;
+    test = 0;
     totalNumberRegions = 1;
     for (int i = 0; i < NUMBER_OF_DIMENSION; i++)
     {
-        regionsByDimension[i] = coordsLimits[i] / regionSize[i];
+        regionsByDimension[i] = 2 * coordsLimits[i] / regionSize[i];
         totalNumberRegions *= regionsByDimension[i];
     }
 
@@ -219,25 +263,40 @@ int main()
 
     indvs = new indvData_t[POP_SIZE];
     regions = new region_t[totalNumberRegions];
-    
-    //inicializeIndv(indvs);
-    
-    cout << totalNumberRegions << endl;
+
+    //cout << POP_BY_REGION << endl;
     defineRegions(regions);
+    inicializeIndv(indvs, regions);
 
     cout.precision(6);
-    while (true)
+    for (int i = 0; i < 5000; i++)
     {
-        //calculateFitness(indvs, &best, &bestIndex);
-        //eletism(indvs, best, bestIndex);
+        gen = 0;
+        best = -MAX_Z;
+        totalTest += test;
+        test = 0;
+        resetRegion(regions);
+        inicializeIndv(indvs, regions);
 
-        //cout << best << endl;
+        while (true)
+        {
+            calculateFitness(indvs, regions, &best, &bestIndex);
+            setRegionMutation(regions);
+            eletism(indvs, best, bestIndex);
 
-        gen++;
-        //if (best >= MAX_Z - ERROR)
-        //{
-        //    cout << "gen: " << gen << endl;
-        //    return 0;
-        //}
+            //cout << best << " | ";
+            //cout << gen << endl;
+
+            if (best >= MAX_Z - ERROR)
+            {
+                cout << test << "," << gen << endl;
+                break;
+            }
+
+            gen++;
+        }
     }
+    cout << "total reg: " << totalNumberRegions << " | pop by reg: " << POP_BY_REGION << endl;
+    cout << "region size: " << regionSize[0] << " | " << regionSize[1] << endl;
+    cout << "total test: " << totalTest << endl;
 }

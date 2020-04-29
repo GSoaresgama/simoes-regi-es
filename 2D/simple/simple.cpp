@@ -1,21 +1,22 @@
 #include <iostream>
 #include <cmath>
 
-#define MAX_Y 19.2085
-#define ERROR 0.0001
+#define MAX_Z 19.2085
+#define ERROR 0.0005
 #define MAX_CORD_X 8.055
 #define MAX_CORD_Y 9.664
-#define POP_SIZE 50
+#define POP_SIZE 500
 
 #define START_MUT 5
-#define MUT_DECREASE_RATE 0.95
-#define MUT_INCREASE_RATE 1.05
+#define MUT_DECREASE_RATE 0.8
+#define MUT_INCREASE_RATE 2
 
 using namespace std;
 
 const float coordsLimits[] = {10, 10};
 const float MAX_MUT = 50 * coordsLimits[0];
 
+int test = 0;
 int hasImproved = 5;
 float MUT = START_MUT;
 
@@ -41,7 +42,7 @@ void inicializeIndv(indvData_t *indvs)
 {
     for (int i = 0; i < POP_SIZE; i++)
     {
-        indvs[i].fitness = -MAX_Y;
+        indvs[i].fitness = -MAX_Z;
         indvs[i].x = (float)(rand() % (int)(2 * coordsLimits[0] * 100) - coordsLimits[0] * 100) / 100;
         indvs[i].y = (float)(rand() % (int)(2 * coordsLimits[1] * 100) - coordsLimits[1] * 100) / 100;
 
@@ -97,6 +98,8 @@ void calculateFitness(indvData_t *indvs, float *best, int *bestIndex)
             hasImproved = 5;
         }
     }
+
+    test += POP_SIZE;
 }
 
 void eletism(indvData_t *indvs, float best, int bestIndex)
@@ -119,27 +122,43 @@ int main()
 
     indvData_t *indvs;
 
-    float best = -MAX_Y;
+    float best = -MAX_Z;
 
     int gen = 0;
     int bestIndex;
+    int totalTest = 0;
+    int totalGen = 0;
 
     indvs = new indvData_t[POP_SIZE];
     inicializeIndv(indvs);
 
     cout.precision(6);
-    while (true)
+    for (int i = 0; i < 5000; i++)
     {
-        calculateFitness(indvs, &best, &bestIndex);
-        eletism(indvs, best, bestIndex);
+        totalTest += test;
+        totalGen += gen;
+        gen = 0;
+        test = 0;
+        inicializeIndv(indvs);
+        hasImproved = 5;
+        MUT = START_MUT;
+        best = -MAX_Z;
 
-        cout << best << endl;
-
-        gen++;
-        if (best >= MAX_Y - ERROR)
+        while (true)
         {
-            cout << "gen: " << gen << endl;
-            return 0;
+            calculateFitness(indvs, &best, &bestIndex);
+            eletism(indvs, best, bestIndex);
+
+            //cout << best << endl;
+
+            gen++;
+            if (best >= MAX_Z - ERROR)
+            {
+                cout << test << "," << gen << endl;
+                break;
+            }
         }
     }
+
+    cout << "total test: " << totalTest << " | totalGen: " << totalGen << endl;
 }
