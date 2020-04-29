@@ -19,6 +19,8 @@ const float MAX_MUT = 50 * coordsLimits[0];
 int hasImproved = 5;
 float MUT = START_MUT;
 
+//fonte: https://en.wikipedia.org/wiki/Test_functions_for_optimization  (Hölder table function)
+
 typedef struct indvData_t
 {
     float x;
