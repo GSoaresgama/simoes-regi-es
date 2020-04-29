@@ -5,7 +5,7 @@
 #define ERROR 0.0005
 #define MAX_CORD_X 8.055
 #define MAX_CORD_Y 9.664
-#define DESIRED_POP_SIZE 1000
+#define DESIRED_POP_SIZE 500
 #define NUMBER_OF_DIMENSION 2
 
 #define START_MUT 5
@@ -14,10 +14,8 @@
 
 using namespace std;
 
-int hasImproved = 5;
-
 const float coordsLimits[] = {10, 10};
-const float regionSize[] = {2, 2};
+const float regionSize[] = {20, 20};
 const float MAX_MUT = 50 * coordsLimits[0];
 
 int totalNumberRegions;
@@ -29,7 +27,6 @@ int POP_BY_REGION;
 int POP_SIZE;
 int test;
 
-float MUT = START_MUT;
 
 //fonte: https://en.wikipedia.org/wiki/Test_functions_for_optimization  (Hölder table function)
 
@@ -93,7 +90,7 @@ void defineRegions(region_t *regions)
         {
             regionLimits[i][j] = j * regionSize[i] - regionSize[i] * regionsByDimension[i] / 2;
 
-            //cout << regionLimits[i][j] << endl;
+            cout << regionLimits[i][j] << endl;
         }
     }
 
@@ -240,7 +237,9 @@ void resetRegion(region_t *regions)
 
 int main()
 {
-    srand(time(0));
+    //srand(time(0));
+    srand(0);
+
 
     indvData_t *indvs;
     region_t *regions;
@@ -252,6 +251,7 @@ int main()
     int totalTest = 0;
     test = 0;
     totalNumberRegions = 1;
+
     for (int i = 0; i < NUMBER_OF_DIMENSION; i++)
     {
         regionsByDimension[i] = 2 * coordsLimits[i] / regionSize[i];
@@ -286,13 +286,13 @@ int main()
 
             //cout << best << " | ";
             //cout << gen << endl;
-
+            
             if (best >= MAX_Z - ERROR)
             {
-                cout << test << "," << gen << endl;
+                //cout << test << "," << gen << endl;
                 break;
             }
-
+           
             gen++;
         }
     }

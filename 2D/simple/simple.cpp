@@ -5,7 +5,7 @@
 #define ERROR 0.0005
 #define MAX_CORD_X 8.055
 #define MAX_CORD_Y 9.664
-#define POP_SIZE 500
+#define POP_SIZE 1000
 
 #define START_MUT 5
 #define MUT_DECREASE_RATE 0.8
@@ -43,8 +43,12 @@ void inicializeIndv(indvData_t *indvs)
     for (int i = 0; i < POP_SIZE; i++)
     {
         indvs[i].fitness = -MAX_Z;
-        indvs[i].x = (float)(rand() % (int)(2 * coordsLimits[0] * 100) - coordsLimits[0] * 100) / 100;
-        indvs[i].y = (float)(rand() % (int)(2 * coordsLimits[1] * 100) - coordsLimits[1] * 100) / 100;
+        //indvs[i].x = (float)(rand() % (int)(2 * coordsLimits[0] * 100) - coordsLimits[0] * 100) / 100;
+        //indvs[i].y = (float)(rand() % (int)(2 * coordsLimits[1] * 100) - coordsLimits[1] * 100) / 100;
+        indvs[i].x = (float)(rand() % (int)(coordsLimits[0] * 2 * 100)) / 100;
+        indvs[i].x -= coordsLimits[0];
+        indvs[i].y = (float)(rand() % (int)(coordsLimits[1] * 2 * 100)) / 100;
+        indvs[i].y -= coordsLimits[1];
 
         //cout << indvs[i].x << " | " << indvs[i].y << endl;
     }
@@ -52,20 +56,6 @@ void inicializeIndv(indvData_t *indvs)
 
 void simpleMutation(indvData_t *indv)
 {
-    if (MUT > MAX_MUT)
-        MUT = MAX_MUT;
-    else if (MUT < START_MUT)
-        MUT = START_MUT;
-
-    if (hasImproved == 0)
-        MUT *= MUT_INCREASE_RATE;
-    else
-    {
-        if (MUT > START_MUT)
-            MUT = START_MUT;
-
-        MUT *= MUT_DECREASE_RATE;
-    }
 
     (*indv).x += (rand() % (int)(2 * MUT) - MUT) / 100.0;
     (*indv).y += (rand() % (int)(2 * MUT) - MUT) / 100.0;
@@ -83,6 +73,21 @@ void simpleMutation(indvData_t *indv)
 
 void calculateFitness(indvData_t *indvs, float *best, int *bestIndex)
 {
+    if (MUT > MAX_MUT)
+        MUT = MAX_MUT;
+    else if (MUT < START_MUT)
+        MUT = START_MUT;
+
+    if (hasImproved == 0)
+        MUT *= MUT_INCREASE_RATE;
+    else
+    {
+        if (MUT > START_MUT)
+            MUT = START_MUT;
+
+        MUT *= MUT_DECREASE_RATE;
+    }
+
     if (hasImproved > 0)
         hasImproved--;
 
@@ -118,8 +123,8 @@ void eletism(indvData_t *indvs, float best, int bestIndex)
 
 int main()
 {
-    srand(time(0));
-
+    //srand(time(0));
+    srand(0);
     indvData_t *indvs;
 
     float best = -MAX_Z;
@@ -151,12 +156,12 @@ int main()
 
             //cout << best << endl;
 
-            gen++;
             if (best >= MAX_Z - ERROR)
             {
                 cout << test << "," << gen << endl;
                 break;
             }
+            gen++;
         }
     }
 
