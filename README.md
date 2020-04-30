@@ -22,4 +22,4 @@ pré requisitos (2D):
 
 #### Gráficos escolhidos:
 
-![alt text](https://github.com/GSoaresgama/simoes-regioes/blob/master/1D/grapthic.png?raw=true)
+![1D    ](https://github.com/GSoaresgama/simoes-regioes/blob/master/1D/grapthic.png?raw=true)
