@@ -6,12 +6,11 @@ Análise sobre o uso de regiões em relação aos métodos tradicionais para alg
 
 pré requisitos (1D):
 
--Opencv- c++ 
+  -Opencv- c++ 
   
    tutoriais (linux):
    
-   https://cv-tricks.com/installation/opencv-4-1-ubuntu18-04/
-   
+   https://cv-tricks.com/installation/opencv-4-1-ubuntu18-04/                                                                 
    https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html
 
 
