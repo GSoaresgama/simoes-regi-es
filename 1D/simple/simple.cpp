@@ -250,7 +250,7 @@ int main()
             if (best > MAX_VALUE - ERROR)
             {
                 //cout << best << " , ";
-                cout << gen << " , ";
+                cout << gen << ",";
                 cout << test << endl;
 
                 break;
