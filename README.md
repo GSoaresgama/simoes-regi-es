@@ -18,7 +18,7 @@ pré requisitos (1D):
 pré requisitos (2D):
   
 
-
+-----
 #### Gráficos escolhidos:
 
 ##### 1D:
