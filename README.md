@@ -5,6 +5,7 @@
 Análise sobre o uso de regiões em relação aos métodos tradicionais para algoritmos evolutivos. A ideia inicial se baseia em dividir os indivíduos de acordo com as suas características (coordenadas, no caso).
 
 pré requisitos (1D):
+  
   -Opencv c++
   
     tutoriais (linux):
@@ -14,7 +15,7 @@ pré requisitos (1D):
 pré requisitos (2D):
 
   -Nenhum, no momento.
-  
-  ###Gráfico escolhido:
-    ####1D:
-      2 * cos(0.39 * x) + 5 * sin(0.5 * x) + 0.5 * cos(0.1 * x) + 10 * sin(0.7 * x) + 5 * sin(1 * x) + 5 * sin(0.35 * x)) / 5;
+ 
+ ### Gráfico escolhido
+    1D:
+      (2*cos(0.39*x) + 5*sin(0.5*x) + 0.5*cos(0.1*x) + 10*sin(0.7*x) + 5*sin(1*x) + 5*sin(0.35*x)) / 5;
