@@ -10,8 +10,8 @@ pré requisitos (1D):
   
    tutoriais (linux):
    
-      https://cv-tricks.com/installation/opencv-4-1-ubuntu18-04/
-      https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html
+   https://cv-tricks.com/installation/opencv-4-1-ubuntu18-04/
+   https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html
 
 pré requisitos (2D):
   
