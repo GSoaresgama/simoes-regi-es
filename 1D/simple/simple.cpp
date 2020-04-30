@@ -9,7 +9,7 @@
 #define LENGHT 1800
 #define MAX_Y 6.0
 #define X_LIMITS 75
-#define INDV_COUNT 100
+#define INDV_COUNT 50
 #define START_MUT 50
 #define MUT_DECREASE_RATE 0.80
 #define MUT_INCREASE_RATE 2
@@ -250,7 +250,7 @@ int main()
             if (best > MAX_VALUE - ERROR)
             {
                 //cout << best << " , ";
-                cout << gen << ",";
+                cout << gen << " ";
                 cout << test << endl;
 
                 break;
