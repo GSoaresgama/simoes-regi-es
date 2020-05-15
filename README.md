@@ -2,6 +2,7 @@
 
 Análise sobre o uso de regiões para algoritmos evolutivos. A ideia inicial se baseia em dividir os indivíduos de acordo com as suas características (coordenadas, no caso).
 
+
 pré requisitos (1D):
 
   **-Opencv- c++** 
