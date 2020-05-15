@@ -10,12 +10,12 @@
 #define MAX_Y 6.0
 #define X_LIMITS 75
 #define INDV_COUNT 50
-#define START_MUT 50
+#define START_MUT 100
 #define MUT_DECREASE_RATE 0.80
 #define MUT_INCREASE_RATE 2
 
 #define MAX_VALUE 4.76224
-#define ERROR 0.01
+#define ERROR 0.0005
 
 #define MAX_GEN 10000
 
@@ -218,7 +218,7 @@ int main()
 
     cout.precision(6);
 
-    for (int i = 0; i < 500; i++)
+    for (int i = 0; i < 5000; i++)
     {
         totalGen += gen;
         totalTests += test;
@@ -245,7 +245,7 @@ int main()
             eletism(indvs, bestIndex);
 
             //plotInfoGrath(gen, bestFitHist, averageFitHist);
-            imshow(funcWindow, functionImg);
+            //imshow(funcWindow, functionImg);
 
             if (best > MAX_VALUE - ERROR)
             {
@@ -256,7 +256,7 @@ int main()
                 break;
             }
 
-            waitKey(1);
+            //waitKey(1);
 
             gen++;
         } /* code */

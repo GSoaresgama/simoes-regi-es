@@ -16,7 +16,7 @@
 #define MUT_INCREASE_RATE 2
 
 #define MAX_VALUE 4.76224
-#define ERROR 0.01
+#define ERROR 0.0005
 
 using namespace std;
 using namespace cv;
@@ -29,7 +29,7 @@ float bestXcord = 0;
 float best = -MAX_Y;
 int test = 0;
 
-int START_POP = 10;
+const int START_POP = 20;
 int regionListSize;
 
 Mat functionImg(HEIGHT, LENGHT, CV_8UC3, Scalar(0, 0, 0));
@@ -375,7 +375,7 @@ int main()
 
     cout << "population size at start: " << START_POP << " interval: " << 40 << endl;
 
-    for (int i = 0; i < 500; i++)
+    for (int i = 0; i < 5000; i++)
     {
         totalGen += gen;
         totalTests += test;
@@ -416,7 +416,7 @@ int main()
             mutation(indVec, regionList);
 
             //imshow(funcWindow, functionImg);
-            //waitKey(1);
+            //waitKey(0);
 
             if (best > MAX_VALUE - ERROR)
             {

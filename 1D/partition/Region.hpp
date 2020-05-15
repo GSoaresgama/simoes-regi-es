@@ -2,7 +2,7 @@
 
 #include "structs.hpp"
 
-#define NUMBER_OF_REGIONS 10
+#define NUMBER_OF_REGIONS 2
 
 const int INDV_BY_REGION = 50 / NUMBER_OF_REGIONS;
 

@@ -16,7 +16,7 @@
 #define MUT_INCREASE_RATE 2
 
 #define MAX_VALUE 4.76224
-#define ERROR 0.01
+#define ERROR 0.0005
 
 using namespace std;
 using namespace cv;
@@ -311,7 +311,7 @@ int main()
     cout << "number of indvs: " << NUMBER_OF_REGIONS * INDV_BY_REGION
          << " indvs by region: " << INDV_BY_REGION << endl;
     
-    for (int i = 0; i < 500; i++)
+    for (int i = 0; i < 5000; i++)
     {
 
         totalgen += gen;
@@ -351,7 +351,7 @@ int main()
 
             mutation(indVec, regionList);
 
-            imshow(funcWindow, functionImg);
+            //imshow(funcWindow, functionImg);
 
             if (best > MAX_VALUE - ERROR)
             {
@@ -362,7 +362,7 @@ int main()
                 break;
             }
 
-            waitKey(1);
+            //waitKey(0);
 
             gen++;
         }
