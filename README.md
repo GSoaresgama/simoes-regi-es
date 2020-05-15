@@ -2,6 +2,8 @@
 
 Análise sobre o uso de regiões para algoritmos evolutivos. A ideia inicial se baseia em dividir os indivíduos de acordo com as suas características (coordenadas, no caso).
 
+Link do vídeo explicativo: https://drive.google.com/file/d/169mqwhPxNK3VjFm5TjddaCBTlW_v07RU/view?usp=sharing
+Peço desculpas caso o aúdio esteja ruim ou caso a minha explicação tenha sido confusa.
 
 pré requisitos (1D):
 
