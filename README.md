@@ -2,11 +2,6 @@
 
 Análise sobre o uso de regiões para algoritmos evolutivos. A ideia inicial se baseia em dividir os indivíduos de acordo com as suas características (coordenadas, no caso).
 
-Peço desculpas caso o áudio esteja ruim ou caso a minha explicação tenha sido confusa.
-No caso do grafico 2D, o erro escolhido foi 0.0005 e com valor máximo de 19.2085.
-
-Link do vídeo explicativo: https://drive.google.com/file/d/1zOcaTfNOEEnkqAZUgZ6o5DL2aJInfC6Z/view?usp=sharing
-
 
 pré requisitos (1D):
 
