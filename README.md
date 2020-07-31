@@ -14,10 +14,6 @@ pré requisitos (1D):
    https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html
 
 
-pré requisitos (2D):
-  
-
-
 -----
 #### Gráficos escolhidos:
 
